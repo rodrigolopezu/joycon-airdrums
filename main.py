@@ -41,14 +41,14 @@ pygame.display.set_caption("AirDrums")
 
 running = True
 
-circulos = {
+circles = {
     "hihat":  {"pos": (150, 260), "color": (0, 255, 120), "label": "HI-HAT"},
     "cymbal": {"pos": (350, 300), "color": (255, 215, 0), "label": "CYMBAL"},
     "kick":   {"pos": (550, 300), "color": (255, 140, 0), "label": "KICK"},
     "snare":  {"pos": (750, 260), "color": (0, 200, 255), "label": "SNARE"},
 }
 
-RADIO = 60
+RADIUS = 60
 
 try:
     while running:
@@ -62,7 +62,7 @@ try:
             pygame.mixer.stop()
             break
 
-        # Lectura
+        # Read sensor data
         xR = joyconR.get_accel_x()
         yR = joyconR.get_accel_y()
         zR = joyconR.get_accel_z()
@@ -80,7 +80,7 @@ try:
         deltaXR = xR - prevXR
         deltaXL = xL - prevXL
 
-        # DERECHA
+        # RIGHT JOY-CON
         if (
             vectorAccelR > 7000 and
             prevDeltaXR < -450 and
@@ -98,7 +98,7 @@ try:
                 lastHit = "kick"
                 lastHitTime = time.time()
 
-        # IZQUIERDA
+        # LEFT JOY-CON
         if (
             vectorAccelL > 7000 and
             prevDeltaXL < -450 and
@@ -121,37 +121,37 @@ try:
         prevDeltaXR = deltaXR
         prevDeltaXL = deltaXL
 
-        # UI
+        # UI Rendering
         screen.fill((10, 10, 15))
 
-        title = font_title.render("AIRDRUMS", True, (255,255,255))
+        title = font_title.render("AIRDRUMS", True, (255, 255, 255))
         title_rect = title.get_rect(center=(450, 60))
         screen.blit(title, title_rect)
 
-        instr = font_instr.render("L = CYMBAL | R = KICK | + ZR/ZL = SNARE / HI-HAT", True, (180,180,180))
+        instr = font_instr.render("L = CYMBAL | R = KICK | + ZR/ZL = SNARE / HI-HAT", True, (180, 180, 180))
         instr_rect = instr.get_rect(center=(450, 110))
         screen.blit(instr, instr_rect)
 
-        for nombre, c in circulos.items():
+        for name, c in circles.items():
             pos = c["pos"]
             base_color = c["color"]
 
             t = time.time() - lastHitTime
-            intensidad = max(0, 1 - t / 0.2) if lastHit == nombre else 0
+            intensity = max(0, 1 - t / 0.2) if lastHit == name else 0
 
-            extra = int(25 * intensidad)
-            radio = RADIO + extra
+            extra = int(25 * intensity)
+            current_radius = RADIUS + extra
 
             color = (
-                min(255, int(base_color[0] + 100 * intensidad)),
-                min(255, int(base_color[1] + 100 * intensidad)),
-                min(255, int(base_color[2] + 100 * intensidad)),
+                min(255, int(base_color[0] + 100 * intensity)),
+                min(255, int(base_color[1] + 100 * intensity)),
+                min(255, int(base_color[2] + 100 * intensity)),
             )
 
-            pygame.draw.circle(screen, color, pos, radio)
-            pygame.draw.circle(screen, (255,255,255), pos, radio, 2)
+            pygame.draw.circle(screen, color, pos, current_radius)
+            pygame.draw.circle(screen, (255, 255, 255), pos, current_radius, 2)
 
-            label = font_pad.render(c["label"], True, (255,255,255))
+            label = font_pad.render(c["label"], True, (255, 255, 255))
             label_rect = label.get_rect(center=pos)
             screen.blit(label, label_rect)
 
@@ -160,7 +160,7 @@ try:
 
 except KeyboardInterrupt:
     pygame.mixer.stop()
-    print("\nDetenido")
+    print("\nStopped")
 except Exception:
     pygame.mixer.stop()
-    print("\nJoycon desconectado")
+    print("\nJoycon disconnected")
